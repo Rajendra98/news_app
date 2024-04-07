@@ -65,7 +65,9 @@ class NewsApiLoader {
                 id = sourceObject?.optString("id"),
                 name = sourceObject.optString("name")
             )
-            val author = articleObject.optString("author")
+            var author = articleObject.optString("author")
+            if(author=="null")
+                author=null
             val title = articleObject.optString("title")
             val description = articleObject.optString("description")
             val url = articleObject.optString("url")

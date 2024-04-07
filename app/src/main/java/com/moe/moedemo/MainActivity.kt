@@ -9,7 +9,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import com.moe.moedemo.repository.NewsApiLoader
 import com.moe.moedemo.ui.MainScreen
 import com.moe.moedemo.ui.NewsScreen
@@ -29,6 +33,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+
+
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {

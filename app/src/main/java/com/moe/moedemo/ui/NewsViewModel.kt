@@ -1,5 +1,6 @@
 package com.moe.moedemo.ui
 
+import android.content.ClipDescription
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -14,15 +15,17 @@ import kotlinx.coroutines.launch
 
 data class NewsState(
     val isLoading: Boolean = false,
-    val articles: List<Article>? = emptyList(),
+    val articles: MutableList<Article>? = mutableListOf(),
     val errorMessage: String? = null,
-    val sOpenUrl:String?=null
-)
+    val sOpenUrl:String?=null,
+
+    )
 
 sealed class NewsEvent {
     object FetchNews : NewsEvent()
     object  SortOldToNew:NewsEvent()
     object SortNewToOld:NewsEvent()
+    data class ShowDescription(val index:Int):NewsEvent()
 }
 
 class NewsViewModel(val newsApiLoader: NewsApiLoader) : ViewModel() {
@@ -40,7 +43,7 @@ class NewsViewModel(val newsApiLoader: NewsApiLoader) : ViewModel() {
             // Call loadNewsApi() function to fetch news articles
             val newsResponse = newsApiLoader.loadNewsApi()
             if (newsResponse != null ) {
-                _state.value = state.value.copy(isLoading = false, articles = newsResponse.articles)
+                _state.value = state.value.copy(isLoading = false, articles = newsResponse.articles?.toMutableList())
             } else {
                 _state.value = state.value.copy(isLoading = false, errorMessage = "Failed to fetch news articles.")
             }
@@ -68,14 +71,28 @@ class NewsViewModel(val newsApiLoader: NewsApiLoader) : ViewModel() {
             is NewsEvent.SortOldToNew->{
                 _state.value=state.value.copy(isLoading = true)
                 val list= state.value.articles?.let { sortArticlesOldToNew(it) }
-                _state.value=state.value.copy(isLoading = false,articles = list)
+                _state.value=state.value.copy(isLoading = false,articles = list?.toMutableList())
 
             }
             is NewsEvent.SortNewToOld->{
                 _state.value=state.value.copy(isLoading = true)
                 val list= state.value.articles?.let { sortArticlesNewToOld(it) }
-                _state.value=state.value.copy(isLoading = false,articles = list)
+                _state.value=state.value.copy(isLoading = false,articles = list?.toMutableList())
 
+
+            }
+            is NewsEvent.ShowDescription->{
+                //reverse falg
+                val updatedArticles = state.value.articles?.mapIndexed { index, article ->
+                    if (index == event.index) {
+                        // Update the showDes value of the specific article
+                        article.copy(showDescription = !article.showDescription)
+                    } else {
+                        article
+                    }
+                }
+
+                _state.value=state.value.copy(articles = updatedArticles?.toMutableList())
 
             }
         }
