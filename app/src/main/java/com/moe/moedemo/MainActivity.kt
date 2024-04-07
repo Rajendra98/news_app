@@ -10,6 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.moe.moedemo.repository.NewsApiLoader
+import com.moe.moedemo.ui.MainScreen
+import com.moe.moedemo.ui.NewsScreen
+import com.moe.moedemo.ui.NewsViewModel
 import com.moe.moedemo.ui.theme.MoeDemoTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,12 +22,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             MoeDemoTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+                    val newsViewModel=NewsViewModel(NewsApiLoader())
+                    MainScreen(newsViewModel =newsViewModel )
+
             }
         }
     }

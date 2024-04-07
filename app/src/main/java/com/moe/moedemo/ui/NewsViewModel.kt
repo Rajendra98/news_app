@@ -1,22 +1,28 @@
 package com.moe.moedemo.ui
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moe.moedemo.model.Article
 import com.moe.moedemo.repository.NewsApiLoader
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class NewsState(
     val isLoading: Boolean = false,
     val articles: List<Article>? = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val sOpenUrl:String?=null
 )
 
 sealed class NewsEvent {
     object FetchNews : NewsEvent()
-    data class OpenArticle(val url: String) : NewsEvent()
+    object  SortOldToNew:NewsEvent()
+    object SortNewToOld:NewsEvent()
 }
 
 class NewsViewModel(val newsApiLoader: NewsApiLoader) : ViewModel() {
@@ -29,6 +35,7 @@ class NewsViewModel(val newsApiLoader: NewsApiLoader) : ViewModel() {
 
     private fun fetchNews() {
         viewModelScope.launch(Dispatchers.IO) {
+            delay(100)
             _state.value = state.value.copy(isLoading = true)
             // Call loadNewsApi() function to fetch news articles
             val newsResponse = newsApiLoader.loadNewsApi()
@@ -39,11 +46,38 @@ class NewsViewModel(val newsApiLoader: NewsApiLoader) : ViewModel() {
             }
         }
     }
+    // Function to sort the list of articles based on publishedAt time from old to new
+    fun sortArticlesOldToNew(articles: List<Article>): List<Article> {
+        return articles.sortedBy { article ->
+            article.publishedAt
+        }
+    }
+
+    // Function to sort the list of articles based on publishedAt time from new to old
+    fun sortArticlesNewToOld(articles: List<Article>): List<Article> {
+        return articles.sortedByDescending { article ->
+            article.publishedAt
+        }
+    }
+
+
 
     fun onEvent(event: NewsEvent) {
         when (event) {
             is NewsEvent.FetchNews -> fetchNews()
-            is NewsEvent.OpenArticle -> TODO() // Handle opening article in browser
+            is NewsEvent.SortOldToNew->{
+                _state.value=state.value.copy(isLoading = true)
+                val list= state.value.articles?.let { sortArticlesOldToNew(it) }
+                _state.value=state.value.copy(isLoading = false,articles = list)
+
+            }
+            is NewsEvent.SortNewToOld->{
+                _state.value=state.value.copy(isLoading = true)
+                val list= state.value.articles?.let { sortArticlesNewToOld(it) }
+                _state.value=state.value.copy(isLoading = false,articles = list)
+
+
+            }
         }
     }
 }
